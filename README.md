@@ -165,8 +165,9 @@ This page provides root-cause insights by analyzing the relationship between fin
 
 ---
 
-# Repository Structure
+## Repository Structure
 
+```
 financial-complaints-analytics-platform
 │
 ├── architecture
@@ -202,6 +203,8 @@ financial-complaints-analytics-platform
 └── documentation
     ├── data_model.md
     └── dashboard_explanation.md
+```
+
 
 ---
 
