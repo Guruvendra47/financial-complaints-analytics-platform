@@ -1,0 +1,16 @@
+{
+  "name": "Professional Light Finance",
+  "dataColors": [
+    "#2F6DB3",
+    "#4C8EDA",
+    "#7FB3F5",
+    "#A3C9FF",
+    "#F4B400",
+    "#FF7043",
+    "#26A69A",
+    "#8E44AD"
+  ],
+  "background": "#F5F7FA",
+  "foreground": "#2C2C2C",
+  "tableAccent": "#2F6DB3"
+}

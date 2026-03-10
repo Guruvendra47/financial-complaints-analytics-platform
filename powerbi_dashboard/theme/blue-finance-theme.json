@@ -1,0 +1,16 @@
+{
+  "name": "Professional Blue Finance",
+  "dataColors": [
+    "#1F4E79",
+    "#2E75B6",
+    "#5B9BD5",
+    "#8FAADC",
+    "#4472C4",
+    "#70AD47",
+    "#ED7D31",
+    "#A5A5A5"
+  ],
+  "background": "#F4F6F9",
+  "foreground": "#2C2C2C",
+  "tableAccent": "#1F4E79"
+}
