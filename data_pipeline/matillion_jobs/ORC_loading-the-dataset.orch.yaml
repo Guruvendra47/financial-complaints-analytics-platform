@@ -1,0 +1,109 @@
+type: "orchestration"
+version: "1.0"
+pipeline:
+  components:
+    Start:
+      type: "start"
+      transitions:
+        unconditional:
+        - "S3 Load"
+      parameters:
+        componentName: "Start"
+    S3 Load:
+      type: "s3-load"
+      transitions:
+        success:
+        - "Run Transformation"
+      parameters:
+        componentName: "S3 Load"
+        stage: "COMPLAINTS_STAGE"
+        pattern: ".*"
+        warehouse: "COMPLAINTS_WH"
+        database: "FINANCE_ANALYTICS"
+        schema: "COMPLAINTS"
+        targetTable: "COMPLAINTS_RAW"
+        loadColumns:
+        - "COMPANY"
+        - "COMPANY_PUBLIC_RESPONSE"
+        - "COMPANY_RESPONSE_TO_CONSUMER"
+        - "COMPLAINT_ID"
+        - "CONSUMER_COMPLAINT_NARRATIVE"
+        - "CONSUMER_CONSENT_PROVIDED"
+        - "CONSUMER_DISPUTED"
+        - "DATE_RECEIVED"
+        - "DATE_SENT_TO_COMPANY"
+        - "ISSUE"
+        - "PRODUCT"
+        - "STATE"
+        - "SUB_ISSUE"
+        - "SUB_PRODUCT"
+        - "SUBMITTED_VIA"
+        - "TAGS"
+        - "TIMELY_RESPONSE"
+        - "ZIP_CODE"
+        format: "COMPLAINTS_CSV_FORMAT"
+        onError: "Continue"
+        sizeLimitB:
+        purgeFiles: "False"
+        truncateColumns: "False"
+        forceLoad: "False"
+        metadataFields:
+        matchByColumnName: "None"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    Run Transformation:
+      type: "run-transformation"
+      transitions:
+        success:
+        - "End Success"
+        - "End Failure"
+      parameters:
+        componentName: "Run Transformation"
+        transformationJob: "build_warehouse_model.tran.yaml"
+        setScalarVariables:
+        setGridVariables:
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    End Success:
+      type: "end-success"
+      parameters:
+        componentName: "End Success"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    End Failure:
+      type: "end-failure"
+      parameters:
+        componentName: "End Failure"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+design:
+  components:
+    Start:
+      position:
+        x: 0
+        "y": 0
+      tempMetlId: 1
+    S3 Load:
+      position:
+        x: 160
+        "y": 0
+      tempMetlId: 2
+    Run Transformation:
+      position:
+        x: 320
+        "y": 0
+      tempMetlId: 3
+    End Success:
+      position:
+        x: 480
+        "y": 100
+      tempMetlId: 4
+    End Failure:
+      position:
+        x: 480
+        "y": -100
+      tempMetlId: 5

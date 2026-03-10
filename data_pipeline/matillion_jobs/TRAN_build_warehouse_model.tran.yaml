@@ -1,0 +1,526 @@
+type: "transformation"
+version: "1.0"
+pipeline:
+  components:
+    COMPLAINTS_RAW:
+      type: "table-input"
+      parameters:
+        componentName: "COMPLAINTS_RAW"
+        database: "FINANCE_ANALYTICS"
+        schema: "COMPLAINTS"
+        targetTable: "COMPLAINTS_RAW"
+        columnNames:
+        - "DATE_RECEIVED"
+        - "PRODUCT"
+        - "SUB_PRODUCT"
+        - "ISSUE"
+        - "SUB_ISSUE"
+        - "CONSUMER_COMPLAINT_NARRATIVE"
+        - "COMPANY_PUBLIC_RESPONSE"
+        - "COMPANY"
+        - "STATE"
+        - "ZIP_CODE"
+        - "TAGS"
+        - "CONSUMER_CONSENT_PROVIDED"
+        - "SUBMITTED_VIA"
+        - "DATE_SENT_TO_COMPANY"
+        - "COMPANY_RESPONSE_TO_CONSUMER"
+        - "TIMELY_RESPONSE"
+        - "CONSUMER_DISPUTED"
+        - "COMPLAINT_ID"
+        timeOffset:
+    Join:
+      type: "join"
+      sources:
+      - "Rename_Channel_Columns"
+      - "Rename_Company_Columns"
+      - "Rename_Location_Columns"
+      - "Rename_Product_Columns"
+      - "Filter_Complaint_Nulls"
+      parameters:
+        componentName: "Join"
+        mainTable: "Filter_Complaint_Nulls"
+        mainTableAlias: "com"
+        joins:
+        - - "Rename_Location_Columns"
+          - "loc"
+          - "Left"
+        - - "Rename_Company_Columns"
+          - "co"
+          - "Left"
+        - - "Rename_Channel_Columns"
+          - "ch"
+          - "Left"
+        - - "Rename_Product_Columns"
+          - "pd"
+          - "Left"
+        joinExpressions:
+        - - "\"com\".\"STATE\"=\"loc\".\"state\""
+          - "com_Left_loc"
+        - - "\"com\".\"COMPANY\"=\"co\".\"company_name\""
+          - "com_Left_co"
+        - - "\"com\".\"SUBMITTED_VIA\"=\"ch\".\"channel_name\""
+          - "com_Left_ch"
+        - - "\"com\".\"PRODUCT\"=\"pd\".\"product_name\""
+          - "com_Left_pd"
+        columnMappings:
+        - - "com.COMPLAINT_ID"
+          - "complaint_id"
+        - - "pd.product_id"
+          - "product_id"
+        - - "ch.channel_id"
+          - "channel_id"
+        - - "co.company_id"
+          - "company_id"
+        - - "loc.location_id"
+          - "location_id"
+        - - "com.DATE_RECEIVED"
+          - "date_received"
+        - - "com.ISSUE"
+          - "issue"
+        - - "com.TIMELY_RESPONSE"
+          - "timely_response"
+        - - "com.CONSUMER_DISPUTED"
+          - "consumer_disputed"
+    'added load_timestamp column ':
+      type: "calculator"
+      sources:
+      - "Join"
+      parameters:
+        componentName: "added load_timestamp column "
+        includeInputColumns: "Yes"
+        calculations:
+        - - "CURRENT_TIMESTAMP()"
+          - "load_timestamp"
+    Filter_Channel_Nulls:
+      type: "filter"
+      sources:
+      - "COMPLAINTS_RAW"
+      parameters:
+        componentName: "Filter_Channel_Nulls"
+        mode: "Basic"
+        filterConditions:
+        - - "SUBMITTED_VIA"
+          - "Not"
+          - "Null or blank"
+          - ""
+        combineCondition: "And"
+    Filter_Company_Nulls:
+      type: "filter"
+      sources:
+      - "COMPLAINTS_RAW"
+      parameters:
+        componentName: "Filter_Company_Nulls"
+        mode: "Basic"
+        filterConditions:
+        - - "COMPANY"
+          - "Not"
+          - "Null or blank"
+          - ""
+        combineCondition: "And"
+    Filter_State_Nulls:
+      type: "filter"
+      sources:
+      - "COMPLAINTS_RAW"
+      parameters:
+        componentName: "Filter_State_Nulls"
+        mode: "Basic"
+        filterConditions:
+        - - "STATE"
+          - "Not"
+          - "Null or blank"
+          - ""
+        combineCondition: "And"
+    Filter_Product_Nulls:
+      type: "filter"
+      sources:
+      - "COMPLAINTS_RAW"
+      parameters:
+        componentName: "Filter_Product_Nulls"
+        mode: "Basic"
+        filterConditions:
+        - - "PRODUCT"
+          - "Not"
+          - "Null or blank"
+          - ""
+        combineCondition: "And"
+    Aggregate_Unique_Channels:
+      type: "aggregate"
+      sources:
+      - "Filter_Channel_Nulls"
+      parameters:
+        componentName: "Aggregate_Unique_Channels"
+        groupings:
+        - "SUBMITTED_VIA"
+        aggregations:
+        - - "SUBMITTED_VIA"
+          - "Any Value"
+        groupingType: "Group By"
+    Aggregate_Unique_Company:
+      type: "aggregate"
+      sources:
+      - "Filter_Company_Nulls"
+      parameters:
+        componentName: "Aggregate_Unique_Company"
+        groupings:
+        - "COMPANY"
+        aggregations:
+        - - "COMPANY"
+          - "Any Value"
+        groupingType: "Group By"
+    Aggregate_Unique_State:
+      type: "aggregate"
+      sources:
+      - "Filter_State_Nulls"
+      parameters:
+        componentName: "Aggregate_Unique_State"
+        groupings:
+        - "STATE"
+        aggregations:
+        - - "STATE"
+          - "Any Value"
+        groupingType: "Group By"
+    Aggregate_Unique_Product:
+      type: "aggregate"
+      sources:
+      - "Filter_Product_Nulls"
+      parameters:
+        componentName: "Aggregate_Unique_Product"
+        groupings:
+        - "PRODUCT"
+        aggregations:
+        - - "PRODUCT"
+          - "Any Value"
+        groupingType: "Group By"
+    Generate_Channel_Id:
+      type: "calculator"
+      sources:
+      - "Aggregate_Unique_Channels"
+      parameters:
+        componentName: "Generate_Channel_Id"
+        includeInputColumns: "No"
+        calculations:
+        - - "ROW_NUMBER() OVER(ORDER BY \"SUBMITTED_VIA\")"
+          - "channel_id"
+        - - "\"SUBMITTED_VIA\""
+          - "channel_name"
+        - - "CURRENT_TIMESTAMP()"
+          - "load_timestamp"
+    Generate_Company_Id:
+      type: "calculator"
+      sources:
+      - "Aggregate_Unique_Company"
+      parameters:
+        componentName: "Generate_Company_Id"
+        includeInputColumns: "No"
+        calculations:
+        - - "ROW_NUMBER() OVER(ORDER BY \"COMPANY\")"
+          - "company_id"
+        - - "\"COMPANY\""
+          - "company_name"
+        - - "CURRENT_TIMESTAMP()"
+          - "load_timestamp"
+    Generate_Location_Id:
+      type: "calculator"
+      sources:
+      - "Aggregate_Unique_State"
+      parameters:
+        componentName: "Generate_Location_Id"
+        includeInputColumns: "No"
+        calculations:
+        - - "ROW_NUMBER() OVER(ORDER BY \"STATE\")"
+          - "location_id"
+        - - "\"STATE\""
+          - "state"
+        - - "CURRENT_TIMESTAMP()"
+          - "load_timestamp"
+    Generate_Product_Id:
+      type: "calculator"
+      sources:
+      - "Aggregate_Unique_Product"
+      parameters:
+        componentName: "Generate_Product_Id"
+        includeInputColumns: "No"
+        calculations:
+        - - "ROW_NUMBER() OVER(ORDER BY \"PRODUCT\")"
+          - "product_id"
+        - - "\"PRODUCT\""
+          - "product_name"
+        - - "CURRENT_TIMESTAMP()"
+          - "load_timestamp"
+    Rename_Channel_Columns:
+      type: "rename"
+      sources:
+      - "Generate_Channel_Id"
+      parameters:
+        componentName: "Rename_Channel_Columns"
+        columnMapping:
+        - - "channel_id"
+          - "channel_id"
+        - - "channel_name"
+          - "channel_name"
+        - - "load_timestamp"
+          - "load_timestamp"
+        includeInputColumns: "No"
+    Rename_Company_Columns:
+      type: "rename"
+      sources:
+      - "Generate_Company_Id"
+      parameters:
+        componentName: "Rename_Company_Columns"
+        columnMapping:
+        - - "company_id"
+          - "company_id"
+        - - "company_name"
+          - "company_name"
+        - - "load_timestamp"
+          - "load_timestamp"
+        includeInputColumns: "No"
+    Rename_Location_Columns:
+      type: "rename"
+      sources:
+      - "Generate_Location_Id"
+      parameters:
+        componentName: "Rename_Location_Columns"
+        columnMapping:
+        - - "location_id"
+          - "location_id"
+        - - "state"
+          - "state"
+        - - "load_timestamp"
+          - "load_timestamp"
+        includeInputColumns: "No"
+    Rename_Product_Columns:
+      type: "rename"
+      sources:
+      - "Generate_Product_Id"
+      parameters:
+        componentName: "Rename_Product_Columns"
+        columnMapping:
+        - - "product_id"
+          - "product_id"
+        - - "product_name"
+          - "product_name"
+        - - "load_timestamp"
+          - "load_timestamp"
+        includeInputColumns: "No"
+    Load_Dim_Channel_Table:
+      type: "rewrite-table"
+      sources:
+      - "Rename_Channel_Columns"
+      parameters:
+        componentName: "Load_Dim_Channel_Table"
+        warehouse: "COMPLAINTS_WH"
+        database: "FINANCE_ANALYTICS"
+        schema: "COMPLAINTS"
+        targetTable: "DIM_CHANNEL"
+        orderBy:
+        - - "channel_id"
+          - "ASCENDING"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    Load_Dim_Company_Table:
+      type: "rewrite-table"
+      sources:
+      - "Rename_Company_Columns"
+      parameters:
+        componentName: "Load_Dim_Company_Table"
+        warehouse: "COMPLAINTS_WH"
+        database: "FINANCE_ANALYTICS"
+        schema: "COMPLAINTS"
+        targetTable: "DIM_COMPANY"
+        orderBy:
+        - - "company_id"
+          - "ASCENDING"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    Load_Dim_Location_Table:
+      type: "rewrite-table"
+      sources:
+      - "Rename_Location_Columns"
+      parameters:
+        componentName: "Load_Dim_Location_Table"
+        warehouse: "COMPLAINTS_WH"
+        database: "FINANCE_ANALYTICS"
+        schema: "COMPLAINTS"
+        targetTable: "DIM_LOCATION"
+        orderBy:
+        - - "location_id"
+          - "ASCENDING"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    Load_Dim_Product_Table:
+      type: "rewrite-table"
+      sources:
+      - "Rename_Product_Columns"
+      parameters:
+        componentName: "Load_Dim_Product_Table"
+        warehouse: "COMPLAINTS_WH"
+        database: "FINANCE_ANALYTICS"
+        schema: "COMPLAINTS"
+        targetTable: "DIM_PRODUCT"
+        orderBy:
+        - - "product_id"
+          - "ASCENDING"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    Load_Fact_Complaints_Table:
+      type: "rewrite-table"
+      sources:
+      - "added load_timestamp column "
+      parameters:
+        componentName: "Load_Fact_Complaints_Table"
+        warehouse: "COMPLAINTS_WH"
+        database: "FINANCE_ANALYTICS"
+        schema: "COMPLAINTS"
+        targetTable: "FACT_COMPLAINTS"
+        orderBy:
+        - - "complaint_id"
+          - "ASCENDING"
+      postProcessing:
+        updateOutputMessage:
+        updateScalarVariables:
+    Filter_Complaint_Nulls:
+      type: "filter"
+      sources:
+      - "COMPLAINTS_RAW"
+      parameters:
+        componentName: "Filter_Complaint_Nulls"
+        mode: "Basic"
+        filterConditions:
+        - - "COMPLAINT_ID"
+          - "Not"
+          - "Null or blank"
+          - ""
+        combineCondition: "And"
+design:
+  components:
+    COMPLAINTS_RAW:
+      position:
+        x: -280
+        "y": -220
+      tempMetlId: 6
+    Join:
+      position:
+        x: 750
+        "y": -220
+      tempMetlId: 29
+    'added load_timestamp column ':
+      position:
+        x: 950
+        "y": -220
+      tempMetlId: 31
+    Filter_Channel_Nulls:
+      position:
+        x: -110
+        "y": -440
+      tempMetlId: 27
+    Filter_Company_Nulls:
+      position:
+        x: -110
+        "y": -330
+      tempMetlId: 26
+    Filter_State_Nulls:
+      position:
+        x: -100
+        "y": -110
+      tempMetlId: 25
+    Filter_Product_Nulls:
+      position:
+        x: -100
+        "y": 0
+      tempMetlId: 24
+    Aggregate_Unique_Channels:
+      position:
+        x: 70
+        "y": -440
+      tempMetlId: 13
+    Aggregate_Unique_Company:
+      position:
+        x: 80
+        "y": -330
+      tempMetlId: 9
+    Aggregate_Unique_State:
+      position:
+        x: 60
+        "y": -110
+      tempMetlId: 11
+    Aggregate_Unique_Product:
+      position:
+        x: 60
+        "y": 0
+      tempMetlId: 7
+    Generate_Channel_Id:
+      position:
+        x: 270
+        "y": -440
+      tempMetlId: 15
+    Generate_Company_Id:
+      position:
+        x: 270
+        "y": -330
+      tempMetlId: 18
+    Generate_Location_Id:
+      position:
+        x: 280
+        "y": -110
+      tempMetlId: 17
+    Generate_Product_Id:
+      position:
+        x: 280
+        "y": 0
+      tempMetlId: 16
+    Rename_Channel_Columns:
+      position:
+        x: 450
+        "y": -440
+      tempMetlId: 19
+    Rename_Company_Columns:
+      position:
+        x: 460
+        "y": -330
+      tempMetlId: 20
+    Rename_Location_Columns:
+      position:
+        x: 470
+        "y": -110
+      tempMetlId: 21
+    Rename_Product_Columns:
+      position:
+        x: 470
+        "y": 0
+      tempMetlId: 22
+    Load_Dim_Channel_Table:
+      position:
+        x: 730
+        "y": -440
+      tempMetlId: 14
+    Load_Dim_Company_Table:
+      position:
+        x: 740
+        "y": -330
+      tempMetlId: 10
+    Load_Dim_Location_Table:
+      position:
+        x: 740
+        "y": -110
+      tempMetlId: 12
+    Load_Dim_Product_Table:
+      position:
+        x: 740
+        "y": 0
+      tempMetlId: 8
+    Load_Fact_Complaints_Table:
+      position:
+        x: 1130
+        "y": -220
+      tempMetlId: 30
+    Filter_Complaint_Nulls:
+      position:
+        x: -100
+        "y": -220
+      tempMetlId: 28
