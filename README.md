@@ -51,19 +51,9 @@ The platform helps answer the following questions:
 
 The data pipeline follows this architecture:
 
-CFPB Consumer Complaint Dataset
-            ↓
-        AWS S3
-    (Raw Data Storage)
-            ↓
-       Matillion ETL
- (Data Transformation & Orchestration)
-            ↓
-      Snowflake Warehouse
-      (Star Schema Model)
-            ↓
-        Power BI
-  (Interactive Dashboards)
+CFPB Consumer Complaint Dataset → AWS S3 (Storage) → Matillion ETL (Transformation) → Snowflake (Warehouse) → Power BI (Dashboard)
+
+<img width="773" height="724" alt="Architecture-1" src="https://github.com/user-attachments/assets/4ac233e8-f6f6-4a71-a754-708779df1c07" />
 
 This architecture reflects a modern cloud analytics stack used in industry.
 
