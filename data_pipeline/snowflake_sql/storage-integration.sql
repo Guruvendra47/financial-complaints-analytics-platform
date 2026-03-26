@@ -33,7 +33,7 @@ DESC INTEGRATION S3_INT;
 -- Copy STORAGE_AWS_EXTERNAL_ID
 
 -- Update AWS Role Trust Policy
--- Go back to IAM Role → snowflake-s3-access-role
+-- Go back to IAM Role → snowflake-s3-access-role(role name your created)
 -- Edit Trust Relationship.
 
 -- Create External Stage
