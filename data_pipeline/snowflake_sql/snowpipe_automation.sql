@@ -69,7 +69,7 @@ SELECT COUNT(*) FROM channel_table
 UNION ALL
 SELECT COUNT(*) FROM location_table
 
---------------------------------------------------------Snowpipe-Stauts-----------------------------------------------------------------
+--------------------------------------------------------Snowpipe-status-----------------------------------------------------------------
 
 -- This very very important code p
 -- Following are some snowpipe command which will help you to check snowpipe status 
