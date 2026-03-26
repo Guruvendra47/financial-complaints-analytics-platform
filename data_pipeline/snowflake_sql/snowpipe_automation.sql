@@ -43,7 +43,7 @@ MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
 -- CONNECT S3 EVENT → SNOWPIPE
 -- Go to AWS S3 → Open bucket → Go to Properties → Event notifications → Create event → Event type: PUT → Prefix: raw/trades/ → Destination: SNS topic (Snowflake gives this)
 
--- Snowflake gives SNS topic ARN → Run: DESC PIPE stock_pipe; → You will get: → notification_channel: arn:aws:sns:... → copy and paste
+-- Snowflake gives SNS topic ARN → Run: DESC PIPE stock_pipe; or show pipes; → You will get: → notification_channel: arn:aws:sns:... → copy and paste
 
 SHOW PIPES;
 
