@@ -16,7 +16,6 @@ RECORD_DELIMITER = '\n'
 SKIP_HEADER = 1
 SKIP_BLANK_LINES = TRUE
 ERROR_ON_COLUMN_COUNT_MISMATCH = TRUE;
-
 -- Create Raw Table
 -- Using STRING as data type is a classic strategy when you are building what data engineers call a Landing Table (or "Raw" table).
 -- do not adding primary key or any other CONSTRAINT because this raw data.
