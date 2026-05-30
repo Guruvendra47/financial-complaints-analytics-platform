@@ -24,13 +24,5 @@ DESC INTEGRATION S3_INT;
 -- Go back to IAM Role → snowflake-s3-access-role(role name your created)
 -- Edit Trust Relationship.
 
--- Create External Stage
-CREATE STAGE complaints_stage
-URL='s3://financial-complaints-data-lake/raw/'
-STORAGE_INTEGRATION = s3_int;
-
--- Check File Visibility
-LIST @complaints_stage;
-
 --show stages 
 show satges;
