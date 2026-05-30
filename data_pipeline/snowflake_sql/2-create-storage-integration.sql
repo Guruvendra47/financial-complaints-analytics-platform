@@ -1,18 +1,6 @@
 -- Project --
 -- Financial-Complaints-Analytics-Platform --
 
---Create Database and Schema
-CREATE DATABASE FINANCE_ANALYTICS;
-USE DATABASE FINANCE_ANALYTICS;
-CREATE SCHEMA COMPLAINTS;
-USE SCHEMA COMPLAINTS;
-
---Create Warehouse (Compute)
-CREATE WAREHOUSE COMPLAINTS_WH
-WITH WAREHOUSE_SIZE = 'XSMALL'
-AUTO_SUSPEND = 60
-AUTO_RESUME = TRUE;
-
 --Create Custom IAM Policy
 -- Go to AWS Console → IAM → Policies → Create policy
 
