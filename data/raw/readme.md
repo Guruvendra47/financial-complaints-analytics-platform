@@ -6,7 +6,7 @@ This directory contains raw source files prior to cleanup, transformation, and i
 
 ## Storage & Setup Instructions
 
-Raw datasets exceed GitHub file size limits and are excluded from version control via `.gitignore`. 
+The dataset is not included in this repository due to its large size.
 
 To populate this directory locally or prepare files for cloud ingestion:
 
